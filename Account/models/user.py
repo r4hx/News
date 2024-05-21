@@ -9,7 +9,6 @@ class CustomUser(AbstractUser):
         verbose_name="Источники",
         help_text="Источники, к которым пользователь подписан",
         related_name="users",
-        null=True,
         blank=True,
     )
     created_at = models.DateTimeField(
