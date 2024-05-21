@@ -5,10 +5,10 @@ rm-cache: stop
 	find . -type d -name "__pycache__" -delete
 	rm -rf .coverage
 stop:
-	docker-compose down --remove-orphans
+	docker compose down --remove-orphans
 build: stop
-	docker-compose build
+	docker compose build
 up: stop rm-cache
-	docker-compose up
+	docker compose up
 entry:
-	docker-compose exec web /bin/bash
+	docker compose exec web /bin/bash
