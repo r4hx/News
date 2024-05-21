@@ -1,0 +1,11 @@
+__pycache__
+logs/*
+!.gitkeep
+.DS_Store
+.env
+.git
+.python_history
+.venv/
+.vscode
+celerybeat-schedule
+static/*

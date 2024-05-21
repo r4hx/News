@@ -1,0 +1,164 @@
+networks:
+  traefik:
+    external: true
+  internal:
+    external: false
+
+volumes:
+  news-postgresql:
+
+services:
+  db:
+    image: postgres:13.10
+    container_name: news-db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - news-postgresql:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+    networks:
+      - internal
+
+  migrate:
+    image: news-web
+    container_name: 'news-migrate'
+    command: /bin/sh -c "/bin/sh migrate.sh"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+
+  web:
+    image: news-web
+    build: .
+    container_name: 'news-web'
+    restart: always
+    command: /bin/sh -c "python3 -m gunicorn -b 0.0.0.0:80 News.wsgi --reload --log-level debug -w 4"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - 80:80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.rule=Host(`${APP_SITE_ADDRESS}`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: wget --no-verbose --tries=1 --delete-after ${HEALTHCHECK_URL} || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - traefik
+      - internal
+
+  rabbitmq:
+    image: rabbitmq:3.12.9-management-alpine
+    container_name: 'news-rabbitmq'
+    restart: always
+    env_file: 
+      - .env
+    ports:
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      retries: 5
+      timeout: 5s
+    networks:
+      - internal
+
+  celery-summary:
+    image: news-web
+    container_name: 'news-celery-summary'
+    restart: always
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q summary --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
+  celery-titler:
+    image: news-web
+    container_name: 'news-celery-titler'
+    restart: always
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q titler --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
+  celery-rss-import:
+    image: news-web
+    container_name: 'news-celery-rss-import'
+    restart: always
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q rss_import --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
+  celery-cover:
+    image: news-web
+    container_name: 'news-celery-cover'
+    restart: always
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q cover --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
+  celery-beat:
+    image: news-web
+    container_name: 'news-celery-beat'
+    restart: always
+    command: /bin/bash -c "python3 -m celery -A News beat --loglevel=info"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
