@@ -34,7 +34,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 if SECRET_KEY is None:
     raise Exception("DJANGO_SECRET_KEY is not set")
 
-ALLOWED_HOSTS = [os.getenv("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 if ALLOWED_HOSTS is None:
     raise Exception("ALLOWED_HOSTS is not set")
 
