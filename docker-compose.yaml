@@ -27,6 +27,7 @@ services:
   migrate:
     image: news-web
     container_name: 'news-migrate'
+    user: news
     command: /bin/sh -c "/bin/sh migrate.sh"
     env_file:
       - .env
