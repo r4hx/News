@@ -27,7 +27,7 @@ services:
   migrate:
     image: news-web
     container_name: 'news-migrate'
-    user: news
+    user: news_app
     command: /bin/sh -c "/bin/sh migrate.sh"
     env_file:
       - .env
@@ -44,7 +44,7 @@ services:
     build: .
     container_name: 'news-web'
     restart: always
-    user: news
+    user: news_app
     command: /bin/sh -c "python3 -m gunicorn -b 0.0.0.0:80 News.wsgi --reload --log-level debug -w 4"
     env_file:
       - .env
@@ -92,7 +92,7 @@ services:
     image: news-web
     container_name: 'news-celery-summary'
     restart: always
-    user: news
+    user: news_app
     command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q summary --loglevel=info --without-gossip"
     env_file:
       - .env
@@ -108,7 +108,7 @@ services:
     image: news-web
     container_name: 'news-celery-titler'
     restart: always
-    user: news
+    user: news_app
     command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q titler --loglevel=info --without-gossip"
     env_file:
       - .env
@@ -124,7 +124,7 @@ services:
     image: news-web
     container_name: 'news-celery-rss-import'
     restart: always
-    user: news
+    user: news_app
     command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q rss_import --loglevel=info --without-gossip"
     env_file:
       - .env
@@ -140,7 +140,7 @@ services:
     image: news-web
     container_name: 'news-celery-cover'
     restart: always
-    user: news
+    user: news_app
     command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q cover --loglevel=info --without-gossip"
     env_file:
       - .env
@@ -156,7 +156,7 @@ services:
     image: news-web
     container_name: 'news-celery-beat'
     restart: always
-    user: news
+    user: news_app
     command: /bin/bash -c "python3 -m celery -A News beat --loglevel=info"
     env_file:
       - .env
