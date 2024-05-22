@@ -31,7 +31,15 @@ def task_set_cover_from_article(self, article_id: int):
     logger.debug(f"Создание обложки для статьи {article_id=}")
     try:
         with transaction.atomic():
-            article = Article.objects.select_for_update().get(pk=article_id)
+            try:
+                article = Article.objects.select_for_update().get(pk=article_id)
+            except Article.DoesNotExist:
+                logger.exception(f"Статья {article_id=} не существует")
+                raise self.retry(
+                    exc=Exception(f"Статья {article_id=} не существует"),
+                    countdown=int(CELERY_COUNTDOWN),
+                )
+
             cover = get_image_from_source_url(url=article.url)
             article.image_url = cover
             article.save()

@@ -94,6 +94,7 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": os.getenv("POSTGRES_PORT"),
         "CONN_MAX_AGE": 60 * 10,
+        "DISABLE_SERVER_SIDE_CURSORS": True,
     }
 }
 
