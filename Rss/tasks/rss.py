@@ -40,7 +40,15 @@ def task_rss_import_from_feeds(self, feed_id: int = 0):
                 f.save()
         else:
             logger.debug(f"Получение статей из ленты {feed_id=}")
-            feed = Feed.objects.get(pk=feed_id)
+            try:
+                feed = Feed.objects.get(pk=feed_id)
+            except Feed.DoesNotExist:
+                logger.exception(f"Лента {feed_id=} не существует")
+                raise self.retry(
+                    exc=Exception(f"Лента {feed_id=} не существует"),
+                    countdown=int(CELERY_COUNTDOWN),
+                )
+
             links = get_article_links_from_url(url=feed.url)
             for link in links:
                 Article.objects.get_or_create(
