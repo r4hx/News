@@ -21,7 +21,7 @@ class FeedArticlesFeed(Feed):
         return Article.objects.filter(
             source=obj,
             status=ArticleStatusConfigEnum.PUBLISHED.value,
-        )[-100:]
+        ).order_by("-created_at")[:100]
 
     def item_title(self, item):
         return item.title
