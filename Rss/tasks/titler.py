@@ -33,12 +33,9 @@ def task_set_title_from_article(self, article_id: int):
         with transaction.atomic():
             try:
                 article = Article.objects.select_for_update().get(pk=article_id)
-            except Article.DoesNotExist:
+            except Article.DoesNotExist as e:
                 logger.exception(f"Статья {article_id=} не существует")
-                raise self.retry(
-                    exc=Exception(f"Статья {article_id=} не существует"),
-                    countdown=int(CELERY_COUNTDOWN),
-                )
+                raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))
 
             title = get_title_from_source_url(url=article.url)
             article.title = title
