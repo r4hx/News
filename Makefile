@@ -8,7 +8,9 @@ stop:
 	docker compose down --remove-orphans
 build: stop
 	docker compose build
+debug: stop rm-cache
+	docker compose up 
 up: stop rm-cache
-	docker compose up
+	docker compose up -d
 entry:
 	docker compose exec web /bin/bash
