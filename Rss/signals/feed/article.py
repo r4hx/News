@@ -5,11 +5,11 @@ from News.logger import make_logger
 from Rss.models import Feed
 from Rss.tasks.rss import task_rss_import_from_feeds
 
-logger = make_logger(name="signal-rss")
+logger = make_logger(name="signal-feed-articles-importer")
 
 
 @receiver(post_save, sender=Feed)
-def signal_summary_text_from_article(sender, instance, created, **kwargs):
+def signal_import_articles_from_rss(sender, instance, created, **kwargs):
     """
     Сигнал для импорта статей из RSS
     """

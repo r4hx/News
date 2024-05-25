@@ -16,9 +16,14 @@ def get_title_from_source_url(url: str) -> str:
     if response.status_code == 200:
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
-        title_tag = soup.find("title")
+        meta_tag = soup.find("meta", property="og:title")
         try:
-            title = title_tag.text
+            if meta_tag and "content" in meta_tag.attrs:
+                title = meta_tag["content"]
+            else:
+                raise AttributeError(
+                    "Не найден тег <meta property='og:title' content='...'>"
+                )
         except AttributeError:
             logger.exception(
                 f"Не удалось получить название статьи из {url=} с кодом {response.status_code}"
