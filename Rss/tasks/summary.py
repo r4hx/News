@@ -1,5 +1,4 @@
 import os
-import time
 
 from celery import Task
 from django.db import transaction
@@ -9,6 +8,7 @@ from News.logger import make_logger
 from Rss.config import ArticleStatusConfigEnum, CeleryQueueNameConfigEnum
 from Rss.models import Article
 from Rss.tools.summary import get_summary_from_yandex, send_url_to_yandex
+from Rss.tools.tasks import wait_for_object_to_save_in_store
 
 logger = make_logger(name="task-summary")
 
@@ -33,8 +33,8 @@ def task_summary_text_from_article(self: Task, article_id: int):
     :param self: Ссылка на текущий объект задачи.
     :param article_id: ID статьи.
     """
-    time.sleep(1)
     logger.debug(f"Создание пересказа для статьи {article_id=}")
+    wait_for_object_to_save_in_store(model_class=Article, pk=article_id)
     try:
         with transaction.atomic():
             article = Article.objects.select_for_update().get(pk=article_id)
