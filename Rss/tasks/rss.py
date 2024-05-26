@@ -1,4 +1,5 @@
 import os
+import time
 
 from celery import Task
 from django.db import transaction
@@ -32,6 +33,8 @@ def task_rss_import_from_feeds(self: Task, feed_id: int = 0):
     :param self: Ссылка на текущий объект задачи.
     :param feed_id: ID ленты RSS для импорта статей, если 0 - импорт из всех лент.
     """
+    time.sleep(1)
+    logger.debug(f"Импорт статей из RSS")
     try:
         with transaction.atomic():
             if feed_id == 0:
@@ -57,6 +60,8 @@ def import_articles_from_feed(feed: Feed):
 
     :param feed: Лента RSS.
     """
+    time.sleep(1)
+    logger.debug(f"Получение ссылок на статьи из RSS-ленты {feed.url=}")
     links = get_article_links_from_url(url=feed.url)
     for link in links:
         Article.objects.get_or_create(

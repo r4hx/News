@@ -1,4 +1,5 @@
 import os
+import time
 
 from celery import Task
 from django.db import transaction
@@ -32,6 +33,7 @@ def task_set_cover_from_article(self: Task, article_id: int):
     :param self: Ссылка на текущий объект задачи.
     :param article_id: ID статьи.
     """
+    time.sleep(1)
     logger.debug(f"Создание обложки для статьи {article_id=}")
     try:
         with transaction.atomic():
