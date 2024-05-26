@@ -12,15 +12,15 @@ AUTH_USER_MODEL = "Account.CustomUser"
 DEBUG = os.getenv("DEBUG", "False")
 
 APP_ENV = os.getenv("APP_ENV")
-if APP_ENV is None:
+if not APP_ENV:
     raise Exception("APP_ENV is not set")
 
 APP_SITE_ADDRESS = os.getenv("APP_SITE_ADDRESS")
-if APP_SITE_ADDRESS is None:
+if not APP_SITE_ADDRESS:
     raise Exception("APP_SITE_ADDRESS is not set")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
-if SENTRY_DSN is not None:
+if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -33,15 +33,15 @@ if SENTRY_DSN is not None:
     )
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-if SECRET_KEY is None:
+if not SECRET_KEY:
     raise Exception("DJANGO_SECRET_KEY is not set")
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
-if ALLOWED_HOSTS is None:
+if not ALLOWED_HOSTS:
     raise Exception("ALLOWED_HOSTS is not set")
 
 CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS")]
-if CSRF_TRUSTED_ORIGINS is None:
+if not CSRF_TRUSTED_ORIGINS:
     raise Exception("CSRF_TRUSTED_ORIGINS is not set")
 
 

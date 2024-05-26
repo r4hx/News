@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 
 from News.logger import make_logger
+from Rss.exceptions.titler import GetTitleResponseError, TitleNotFoundError
 from Rss.tools.http import HttpClient
 
 logger = make_logger(name="tools-titler")
@@ -9,6 +10,11 @@ logger = make_logger(name="tools-titler")
 def get_title_from_source_url(url: str) -> str:
     """
     Получить название статьи из источника по URL.
+
+    :param url: URL страницы
+    :return: Название статьи
+    :raises GetTitleResponseError: Если запрос к источнику не удался
+    :raises TitleNotFoundError: Если название статьи не найдено
     """
     logger.debug(f"Получение названия статьи из {url=}")
     client = HttpClient()
@@ -16,24 +22,22 @@ def get_title_from_source_url(url: str) -> str:
 
     if response.status_code != 200:
         logger.error(
-            f"Ошибка получения названия статьи из {url=} с кодом {response.status_code}"
+            f"Не удалось установить соединение с {url=} {response.status_code=}"
         )
-        raise Exception(
-            f"Ошибка получения названия статьи из {url=} с кодом {response.status_code}"
-        )
+        raise GetTitleResponseError
 
     html_content = response.text
     soup = BeautifulSoup(html_content, "html.parser")
 
-    title = _extract_title(soup)
+    title = extract_title(soup)
     if title:
         return title
     else:
         logger.error(f"Не удалось получить название статьи из {url=}")
-        raise Exception(f"Не удалось получить название статьи из {url=}")
+        raise TitleNotFoundError(f"Не удалось получить название статьи из {url=}")
 
 
-def _extract_title(soup: BeautifulSoup) -> str:
+def extract_title(soup: BeautifulSoup) -> str:
     """
     Извлечение названия статьи из HTML с использованием BeautifulSoup.
 

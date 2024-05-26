@@ -1,5 +1,6 @@
 import os
 
+from celery import Task
 from django.db import transaction
 
 from News.celery import app
@@ -11,12 +12,12 @@ from Rss.tools.summary import get_summary_from_yandex, send_url_to_yandex
 logger = make_logger(name="task-summary")
 
 CELERY_MAX_RETRIES = os.getenv("CELERY_MAX_RETRIES")
-if CELERY_MAX_RETRIES is None:
-    raise Exception("CELERY_MAX_RETRIES is not set")
+if not CELERY_MAX_RETRIES:
+    raise EnvironmentError("CELERY_MAX_RETRIES is not set")
 
 CELERY_COUNTDOWN = os.getenv("CELERY_COUNTDOWN")
-if CELERY_COUNTDOWN is None:
-    raise Exception("CELERY_COUNTDOWN is not set")
+if not CELERY_COUNTDOWN:
+    raise EnvironmentError("CELERY_COUNTDOWN is not set")
 
 
 @app.task(
@@ -24,33 +25,29 @@ if CELERY_COUNTDOWN is None:
     queue=CeleryQueueNameConfigEnum.SUMMARY.value,
     max_retries=int(CELERY_MAX_RETRIES),
 )
-def task_summary_text_from_article(self, article_id: int):
+def task_summary_text_from_article(self: Task, article_id: int):
     """
-    Задача получения пересказа текста статьи
+    Задача получения пересказа текста статьи.
+
+    :param self: Ссылка на текущий объект задачи.
+    :param article_id: ID статьи.
     """
     logger.debug(f"Создание пересказа для статьи {article_id=}")
     try:
         with transaction.atomic():
-            try:
-                article = Article.objects.select_for_update().get(pk=article_id)
-            except Article.DoesNotExist as e:
-                logger.exception(f"Статья {article_id=} не существует")
-                raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))
-
+            article = Article.objects.select_for_update().get(pk=article_id)
             sharing_url = send_url_to_yandex(url=article.url)
             summary = get_summary_from_yandex(url=sharing_url)
             article.summary_url = sharing_url
             article.summary = summary
             article.save()
+    except Article.DoesNotExist as e:
+        logger.error(f"Статья {article_id=} не существует")
+        raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))
     except Exception as e:
-        logger.exception(f"Не удалось создать пересказ для статьи {article_id=}")
+        logger.error(f"Не удалось создать пересказ для статьи {article_id=}")
         with transaction.atomic():
-            try:
-                article = Article.objects.select_for_update().get(pk=article_id)
-            except Article.DoesNotExist as e:
-                logger.exception(f"Статья {article_id=} не существует")
-                raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))
-
+            article = Article.objects.select_for_update().get(pk=article_id)
             article.retry_count = self.request.retries
             article.error_text = str(e)
             article.status = ArticleStatusConfigEnum.ERROR.value

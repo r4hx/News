@@ -11,7 +11,9 @@ logger = make_logger(name="signal-article-cover")
 @receiver(post_save, sender=Article)
 def signal_set_article_cover(sender, instance, created, **kwargs):
     """
-    Сигнал для указания обложки статьи
+    Сигнал для указания обложки статьи.
+
+    Запускает задачу для установки обложки статьи при создании новой статьи.
     """
     if created:
         logger.debug(f"Получен сигнал установки обложки для статьи {instance=}")

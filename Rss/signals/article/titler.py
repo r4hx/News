@@ -11,7 +11,9 @@ logger = make_logger(name="signal-article-titler")
 @receiver(post_save, sender=Article)
 def signal_set_article_title(sender, instance, created, **kwargs):
     """
-    Сигнал для указания названия статьи
+    Сигнал для указания названия статьи.
+
+    Запускает задачу для установки названия статьи при создании новой статьи.
     """
     if created:
         logger.debug(f"Получен сигнал для запроса названия статьи {instance=}")

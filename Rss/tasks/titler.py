@@ -1,5 +1,6 @@
 import os
 
+from celery import Task
 from django.db import transaction
 
 from News.celery import app
@@ -11,12 +12,12 @@ from Rss.tools.titler import get_title_from_source_url
 logger = make_logger(name="task-titler")
 
 CELERY_MAX_RETRIES = os.getenv("CELERY_MAX_RETRIES")
-if CELERY_MAX_RETRIES is None:
-    raise Exception("CELERY_MAX_RETRIES is not set")
+if not CELERY_MAX_RETRIES:
+    raise EnvironmentError("CELERY_MAX_RETRIES is not set")
 
 CELERY_COUNTDOWN = os.getenv("CELERY_COUNTDOWN")
-if CELERY_COUNTDOWN is None:
-    raise Exception("CELERY_COUNTDOWN is not set")
+if not CELERY_COUNTDOWN:
+    raise EnvironmentError("CELERY_COUNTDOWN is not set")
 
 
 @app.task(
@@ -24,9 +25,12 @@ if CELERY_COUNTDOWN is None:
     queue=CeleryQueueNameConfigEnum.TITLER.value,
     max_retries=int(CELERY_MAX_RETRIES),
 )
-def task_set_title_from_article(self, article_id: int):
+def task_set_title_from_article(self: Task, article_id: int):
     """
-    Задача указания названия статьи
+    Задача указания названия статьи.
+
+    :param self: Ссылка на текущий объект задачи.
+    :param article_id: ID статьи.
     """
     logger.debug(f"Создание названия для статьи {article_id=}")
     try:
@@ -34,12 +38,17 @@ def task_set_title_from_article(self, article_id: int):
             try:
                 article = Article.objects.select_for_update().get(pk=article_id)
             except Article.DoesNotExist as e:
-                logger.exception(f"Статья {article_id=} не существует")
+                logger.error(f"Статья {article_id=} не существует")
                 raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))
 
             title = get_title_from_source_url(url=article.url)
-            article.title = title
-            article.save()
+
+            if title:
+                article.title = title
+                article.save()
+                logger.info(f"Название для статьи {article_id} успешно обновлено")
+            else:
+                logger.error(f"Не удалось получить название для статьи {article_id=}")
     except Exception as e:
-        logger.exception(f"Не удалось создать названия для статьи {article_id=}")
+        logger.error(f"Не удалось создать название для статьи {article_id=}")
         raise self.retry(exc=e, countdown=int(CELERY_COUNTDOWN))

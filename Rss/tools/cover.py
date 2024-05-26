@@ -1,37 +1,55 @@
 from bs4 import BeautifulSoup
 
 from News.logger import make_logger
+from Rss.exceptions.cover import CoverStatusCodeError
 from Rss.tools.http import HttpClient
 
 logger = make_logger(name="tools-cover")
 
 
-def get_image_from_source_url(url: str):
+def get_image_from_source_url(url: str) -> str:
     """
-    Получить изображение из источника
+    Получить URL изображения из источника по заданному URL.
+
+    :param url: URL источника
+    :return: URL изображения или None, если изображение не найдено
     """
     logger.debug(f"Получение изображения из {url=}")
     client = HttpClient()
     response = client.get(url)
-    if response.status_code == 200:
-        html_content = response.text
-        soup = BeautifulSoup(html_content, "html.parser")
-        og_image_tag = soup.find("meta", property="og:image")
-        if og_image_tag:
-            image_url = og_image_tag.get("content")
-            return image_url
-        else:
-            twitter_image_tag = soup.find("meta", property="twitter:image")
-            if twitter_image_tag:
-                image_url = twitter_image_tag.get("content")
-                return image_url
-            else:
-                logger.debug(f"Не удалось получить изображение из {url=}")
-                return None
+
+    if response.status_code != 200:
+        logger.error(
+            f"Ошибка получения изображения из {url=} с кодом {response.status_code=}"
+        )
+        raise CoverStatusCodeError
+
+    html_content = response.text
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    image_url = extract_image_url(soup)
+    if image_url:
+        logger.debug(f"Найдено изображение: {image_url}")
     else:
-        logger.exception(
-            f"Ошибка получения изображения из {url=} с кодом {response.status_code}"
-        )
-        raise Exception(
-            f"Ошибка получения изображения из {url=} с кодом {response.status_code}"
-        )
+        logger.debug(f"Не удалось найти изображение в {url=}")
+
+    return image_url
+
+
+def extract_image_url(soup: BeautifulSoup) -> str:
+    """
+    Извлечь URL изображения из HTML-контента.
+
+    :param soup: Объект BeautifulSoup с HTML-контентом
+    :return: URL изображения или None, если изображение не найдено
+    """
+    og_image_tag = soup.find("meta", property="og:image")
+    if og_image_tag and og_image_tag.get("content"):
+        return og_image_tag.get("content")
+
+    twitter_image_tag = soup.find("meta", property="twitter:image")
+    if twitter_image_tag and twitter_image_tag.get("content"):
+        return twitter_image_tag.get("content")
+
+    default_image = "https://egorovegor.ru/wp-content/uploads/stati.jpeg"
+    return default_image

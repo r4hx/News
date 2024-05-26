@@ -11,16 +11,21 @@ logger = make_logger(name="signal-article-publisher")
 @receiver(post_save, sender=Article)
 def signal_check_ready_to_publish_article(sender, instance, created, **kwargs):
     """
-    Сигнал для проверки статуса статьи
+    Сигнал для проверки готовности к публикации статьи.
+
+    Публикует статью, если у неё установлены следующие поля:
+    - Название
+    - URL пересказа
+    - Текст пересказа
+    - URL изображения
     """
     if (
-        instance.status is not ArticleStatusConfigEnum.PUBLISHED.value
+        instance.status != ArticleStatusConfigEnum.PUBLISHED.value
         and instance.title is not None
         and instance.summary_url is not None
         and instance.summary is not None
         and instance.image_url is not None
     ):
         logger.debug(f"Получен сигнал для публикации статьи {instance=}")
-        Article.objects.filter(pk=instance.pk).update(
-            status=ArticleStatusConfigEnum.PUBLISHED.value
-        )
+        instance.status = ArticleStatusConfigEnum.PUBLISHED.value
+        instance.save(update_fields=["status"])

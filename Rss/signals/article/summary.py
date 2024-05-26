@@ -11,7 +11,9 @@ logger = make_logger(name="signal-article-summary")
 @receiver(post_save, sender=Article)
 def signal_summary_text_from_article(sender, instance, created, **kwargs):
     """
-    Сигнал для получения пересказа текста статьи
+    Сигнал для получения пересказа текста статьи.
+
+    Запускает задачу для получения пересказа текста статьи при создании новой статьи.
     """
     if created:
         logger.debug(f"Получен сигнал для отправки статьи на самморизацию {instance=}")
