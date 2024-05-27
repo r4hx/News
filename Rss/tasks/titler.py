@@ -34,8 +34,8 @@ def task_set_title_from_article(self: Task, article_id: int):
     :param article_id: ID статьи.
     """
     logger.debug(f"Создание названия для статьи {article_id=}")
-    wait_for_object_to_save_in_store(model_class=Article, pk=article_id)
     try:
+        wait_for_object_to_save_in_store(model_class=Article, pk=article_id)
         with transaction.atomic():
             try:
                 article = Article.objects.select_for_update().get(pk=article_id)
