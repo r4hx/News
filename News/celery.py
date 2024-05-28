@@ -15,6 +15,18 @@ app = Celery(
     "News",
     broker=CELERY_BROKER_URL,
 )
+app.conf.update(
+    task_acks_late=True,  # Включает подтверждение задачи после завершения
+    worker_prefetch_multiplier=1,  # Задает количество задач, которые будут забраны одновременно
+    worker_max_tasks_per_child=1,  # Задает количество задач на воркера до его перезапуска
+    task_soft_time_limit=1800,  # Мягкий таймаут выполнения задачи
+    task_time_limit=1900,  # Жесткий таймаут выполнения задачи
+    broker_transport_options={
+        "confirm_publish": True,
+        "heartbeat": 600,  # Настройка heartbeat для поддержания соединения
+        "visibility_timeout": 3600,  # Таймаут подтверждения доставки
+    },
+)
 
 app.conf.beat_schedule = {
     "rss-import": {
