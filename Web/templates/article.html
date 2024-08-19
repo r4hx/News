@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ article.title }}">
-    <meta property="og:description" content="{{ article.summary|slice:":150" }}...">
+    <meta property="og:description" content="{{ article.summary|slice:":300" }}...">
     <meta property="og:image" content="{{ article.image_url }}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:type" content="article">
@@ -15,7 +15,7 @@
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ article.title }}">
-    <meta name="twitter:description" content="{{ article.summary|slice:":150" }}...">
+    <meta name="twitter:description" content="{{ article.summary|slice:":300" }}...">
     <meta name="twitter:image" content="{{ article.image_url }}">
     <meta name="twitter:url" content="{{ request.build_absolute_uri }}">
     
@@ -32,7 +32,7 @@
     <section class="section">
         <div class="container article-container">
             <div class="columns is-centered">
-                <div class="column is-half">
+                <div class="column is-full-mobile is-half-tablet is-half-desktop">
             <div class="card">
                 <!-- Изображение статьи -->
                 {% if article.image_url %}
