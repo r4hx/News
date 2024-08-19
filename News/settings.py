@@ -9,7 +9,7 @@ LOG_DIR = os.getenv("LOG_DIR", "logs")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 
 AUTH_USER_MODEL = "Account.CustomUser"
-DEBUG = os.getenv("DEBUG", "False")
+DEBUG = int(os.getenv("DEBUG", 0))
 
 APP_ENV = os.getenv("APP_ENV")
 if not APP_ENV:
