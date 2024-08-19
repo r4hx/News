@@ -1,7 +1,10 @@
+from os import getenv
+
 from django.db import models
 from django.utils import timezone
 
 from Rss.config import ArticleStatusConfigEnum
+from Web.tools.idhide import encode_id
 
 
 class Article(models.Model):
@@ -72,6 +75,12 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title if self.title is not None else str(self.url)
+
+    def get_encoded_id(self):
+        return encode_id(self.id)
+
+    def get_absolute_url(self):
+        return f"/{self.source.slug}/{self.get_encoded_id()}/"
 
     def save(self, *args, **kwargs):
         self.updated_at = timezone.now()

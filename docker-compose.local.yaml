@@ -1,0 +1,140 @@
+volumes:
+  news-postgresql:
+
+services:
+  db:
+    image: postgres:13.10
+    container_name: news-db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - news-postgresql:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  migrate:
+    image: news-web
+    container_name: 'news-migrate'
+    user: news_app
+    command: /bin/sh -c "/bin/sh migrate.sh"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: news-web
+    build: .
+    container_name: 'news-web'
+    restart: always
+    user: news_app
+    ports: 
+      - 80:80
+    command: /bin/sh -c "python3 -m gunicorn -b 0.0.0.0:80 News.wsgi --reload --log-level debug -w 4"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: wget --no-verbose --tries=1 --delete-after ${HEALTHCHECK_URL} || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3.12.9-management-alpine
+    container_name: 'news-rabbitmq'
+    restart: always
+    env_file: 
+      - .env
+    ports:
+      - 15672:15672
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  celery-summary:
+    image: news-web
+    container_name: 'news-celery-summary'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q summary --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  celery-titler:
+    image: news-web
+    container_name: 'news-celery-titler'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q titler --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  celery-rss-import:
+    image: news-web
+    container_name: 'news-celery-rss-import'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q rss_import --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  celery-cover:
+    image: news-web
+    container_name: 'news-celery-cover'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q cover --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  celery-beat:
+    image: news-web
+    container_name: 'news-celery-beat'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News beat --loglevel=info"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+

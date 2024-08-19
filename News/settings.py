@@ -30,6 +30,7 @@ if SENTRY_DSN:
         environment=APP_ENV,
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
+        ignore_errors=[],
     )
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "Account",
     "Rss",
+    "Web",
 ]
 
 MIDDLEWARE = [

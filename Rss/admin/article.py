@@ -17,6 +17,7 @@ class ArticleAdmin(admin.ModelAdmin):
         "summary_url",
         "image_url",
         "status",
+        "get_article_url",
         "retry_count",
         "error_text",
         "created_at",
@@ -32,6 +33,11 @@ class ArticleAdmin(admin.ModelAdmin):
                 source__in=request.user.feeds.values_list("pk", flat=True),
             )
         return qs
+
+    def get_article_url(self, obj):
+        return obj.get_absolute_url()
+
+    get_article_url.short_description = "Article URL"
 
 
 admin.site.register(Article, ArticleAdmin)

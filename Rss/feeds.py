@@ -34,4 +34,4 @@ class FeedArticlesFeed(Feed):
         return mark_safe(f"{image_html}{linebreaks(item.summary)}")
 
     def item_link(self, item):
-        return item.url
+        return item.get_absolute_url()

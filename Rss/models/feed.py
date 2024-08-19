@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from django.db import models
@@ -36,6 +37,12 @@ class Feed(models.Model):
         null=True,
         editable=False,
     )
+    icon = models.URLField(
+        verbose_name="Иконка",
+        help_text="Иконка статьи",
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Создано",
@@ -62,5 +69,8 @@ class Feed(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(uuid4())
+        if not self.icon:
+            url = urlparse(self.url)
+            self.icon = f"{url.scheme}://{url.netloc}/favicon.ico"
         self.updated_at = timezone.now()
         super(Feed, self).save(*args, **kwargs)

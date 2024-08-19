@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{{ article.title }}">
+    <meta property="og:description" content="{{ article.summary|slice:":150" }}...">
+    <meta property="og:image" content="{{ article.image_url }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ article.title }}">
+    <meta name="twitter:description" content="{{ article.summary|slice:":150" }}...">
+    <meta name="twitter:image" content="{{ article.image_url }}">
+    <meta name="twitter:url" content="{{ request.build_absolute_uri }}">
+    
+    <style>
+        .article-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    </style>
+    
+</head>
+<body>
+    <section class="section">
+        <div class="container article-container">
+            <div class="columns is-centered">
+                <div class="column is-half">
+            <div class="card">
+                <!-- Изображение статьи -->
+                {% if article.image_url %}
+                <div class="card-image">
+                    <figure class="image">
+                        <img src="{{ article.image_url }}" alt="{{ article.title }}">
+                    </figure>
+                </div>
+                {% endif %}
+
+                <div class="card-content">
+                    <div class="media">
+                        <!-- Место для иконки автора или категории -->
+                        <div class="media-left">
+                            <figure class="image is-48x48">
+                                <img src="{{ article.source.icon }}" alt="{{ article.source.name }}">
+                            </figure>
+                        </div>
+
+                        <!-- Заголовок и метаданные статьи -->
+                        <div class="media-content">
+                            <p class="title is-4">{{ article.title }}</p>
+                            <p class="subtitle is-6">
+                                <a href="{{ article.url }}" target="_blank">Ссылка на источник</a>
+                                <br>
+                                <time datetime="{{ article.created_at|date:'d.m.Y' }}">
+                                    Дата публикации: {{ article.created_at|date:"d.m.Y" }}
+                                </time>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Основное содержание статьи -->
+                    <div class="content">
+                        <p>{{ article.summary|linebreaksbr }}</p>                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
