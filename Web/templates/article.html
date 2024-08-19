@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ article.title }}</title>
@@ -19,31 +20,6 @@
     <meta name="twitter:image" content="{{ article.image_url }}">
     <meta name="twitter:url" content="{{ request.build_absolute_uri }}">
 
-    <style>
-        /* Сброс отступов для карточки на мобильных устройствах */
-        .card-container {
-            margin: 0; /* Убираем отступы */
-            padding: 0; /* Убираем внутренние отступы */
-        }
-
-        /* Внутренние отступы и максимальная ширина для карточки */
-        .card-content {
-            padding: 1.5rem; /* Пример внутреннего отступа, можно изменить по необходимости */
-        }
-
-        /* Ширина карточки на мобильных устройствах */
-        @media (max-width: 768px) {
-            .card-container {
-                width: 100%; /* На мобильных устройствах карточка занимает всю ширину */
-            }
-        }
-
-        /* Ширина карточки на больших экранах */
-        .card-container {
-            max-width: 600px; /* Устанавливаем максимальную ширину карточки */
-            margin: 0 auto; /* Центрируем карточку по горизонтали */
-        }
-    </style>
 </head>
 <body>
     <section class="section">
