@@ -152,6 +152,22 @@ services:
     networks:
       - internal
 
+  celery-related:
+    image: news-web
+    container_name: 'news-celery-related'
+    restart: always
+    user: news_app
+    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q related --loglevel=info --without-gossip"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+
   celery-beat:
     image: news-web
     container_name: 'news-celery-beat'

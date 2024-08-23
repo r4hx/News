@@ -6,3 +6,4 @@ class CeleryQueueNameConfigEnum(Enum):
     TITLER = "titler"
     RSS_IMPORT = "rss_import"
     COVER = "cover"
+    RELATED = "related"

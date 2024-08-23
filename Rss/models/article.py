@@ -1,5 +1,3 @@
-from os import getenv
-
 from django.db import models
 from django.utils import timezone
 
@@ -47,6 +45,12 @@ class Article(models.Model):
         verbose_name="Статус",
         help_text="Статус статьи",
         default=0,
+    )
+    related = models.ManyToManyField(
+        "Article",
+        verbose_name="Похожие записи",
+        help_text="Похожие записи",
+        blank=True,
     )
     retry_count = models.IntegerField(
         default=0,

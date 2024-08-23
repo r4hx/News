@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from News.logger import make_logger
 from Rss.config import ArticleStatusConfigEnum
 from Rss.models import Article
+from Rss.tasks.related import task_set_related_articles_for_article
 
 logger = make_logger(name="signal-article-publisher")
 
@@ -29,3 +30,6 @@ def signal_check_ready_to_publish_article(sender, instance, created, **kwargs):
         logger.debug(f"Получен сигнал для публикации статьи {instance=}")
         instance.status = ArticleStatusConfigEnum.PUBLISHED.value
         instance.save(update_fields=["status"])
+        task_set_related_articles_for_article.apply_async(
+            kwargs={"article_id": instance.pk}
+        )

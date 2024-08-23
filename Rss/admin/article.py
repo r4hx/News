@@ -17,12 +17,14 @@ class ArticleAdmin(admin.ModelAdmin):
         "summary_url",
         "image_url",
         "status",
+        "related",
         "get_article_url",
         "retry_count",
         "error_text",
         "created_at",
         "updated_at",
     ]
+    # raw_id_fields = ["related"]
     ordering = ["-pk"]
     save_as = True
 
