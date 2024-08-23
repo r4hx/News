@@ -129,7 +129,7 @@ services:
     container_name: 'news-celery-related'
     restart: always
     user: news_app
-    command: /bin/bash -c "python3 -m celery -A News worker -c 1 -Q related --loglevel=info --without-gossip"
+    command: /bin/bash -c "python3 -m celery -A News worker -c 4 -Q related --loglevel=info --without-gossip"
     env_file:
       - .env
     volumes:
