@@ -18,13 +18,13 @@ class ArticleAdmin(admin.ModelAdmin):
         "image_url",
         "status",
         "related",
-        "get_article_url",
+        "get_absolute_url",
+        "get_full_url",
         "retry_count",
         "error_text",
         "created_at",
         "updated_at",
     ]
-    # raw_id_fields = ["related"]
     ordering = ["-pk"]
     save_as = True
 
@@ -36,10 +36,15 @@ class ArticleAdmin(admin.ModelAdmin):
             )
         return qs
 
-    def get_article_url(self, obj):
+    def get_absolute_url(self, obj):
         return obj.get_absolute_url()
 
-    get_article_url.short_description = "Article URL"
+    get_absolute_url.short_description = "Absolute URL"
+
+    def get_full_url(self, obj):
+        return obj.get_full_url()
+
+    get_full_url.short_description = "Full URL"
 
 
 admin.site.register(Article, ArticleAdmin)

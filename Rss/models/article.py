@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.html import format_html
 
+from News.settings import APP_SITE_ADDRESS
 from Rss.config import ArticleStatusConfigEnum
 from Web.tools.idhide import encode_id
 
@@ -85,6 +87,10 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         return f"/{self.source.slug}/{self.get_encoded_id()}/"
+
+    def get_full_url(self):
+        url = f"http://{APP_SITE_ADDRESS}/{self.source.slug}/{self.get_encoded_id()}"
+        return format_html("<a href={url} target=_blank>{url}</a>", url=url)
 
     def save(self, *args, **kwargs):
         self.updated_at = timezone.now()

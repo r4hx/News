@@ -64,36 +64,36 @@
                         <p>{{ article.summary|linebreaksbr }}</p>                    
                     </div>
 
-                            <!-- Проверка и отображение похожих записей -->
-                            {% if article.related.all %}
-                            <div class="related-articles">
-                                <div class="columns is-multiline">
-                                    {% for related in article.related.all %}
-                                    <div class="column is-full-mobile is-half-tablet is-half-desktop">
-                                        <div class="card">
-                                            {% if related.image_url %}
-                                            <div class="card-image">
-                                                <figure class="image">
-                                                    <img src="{{ related.image_url }}" alt="{{ related.title }}">
-                                                </figure>
-                                            </div>
-                                            {% endif %}
-                                            <div class="card-content">
-                                                <p class="title is-6">
-                                                    <a href="{{ related.get_absolute_url }}">{{ related.title }}</a>
-                                                </p>
-                                            </div>
-                                        </div>
+                    <!-- Проверка и отображение похожих записей -->
+                    {% if article.related.all %}
+                    <div class="content">
+                        <p class="title is-3 ">Похожие записи</p>
+                    </div>
+
+                    <div class="related-articles">
+                        <div class="columns is-multiline">
+                            {% for related in article.related.all %}
+                            <div class="column is-full-mobile is-full-tablet is-full-desktop">
+                                <div class="card">
+                                    {% if related.image_url %}
+                                    <div class="card-image">
+                                        <figure class="image">
+                                            <img src="{{ related.image_url }}" alt="{{ related.title }}">
+                                        </figure>
                                     </div>
-                                    {% endfor %}
+                                    {% endif %}
+                                    <div class="card-content">
+                                        <p class="title is-6">
+                                            <a href="{{ related.get_absolute_url }}">{{ related.title }}</a>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                            {% else %}
-                            <div class="notification is-info">
-                                Нет похожих записей.
-                            </div>
-                            {% endif %}               
-                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}               
+            </div>
             </div>
             </div>
             </div>

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -6,18 +8,24 @@ from Rss.config.article import ArticleStatusConfigEnum
 from Rss.models import Article
 
 
-def get_top_similar_titles(article_id: int, top_n=7):
-    # Получаем список всех заголовков
+def get_top_similar_titles(article_id: int, top_n=3):
+    # Получаем основный заголовок
+    main_article = Article.objects.get(pk=article_id)
+
+    # Ограничиваем список заголовков на 1 неделю
+    one_week_ago = main_article.created_at - timedelta(weeks=2)
+    one_week_after = main_article.created_at + timedelta(weeks=2)
+
     titles_list = Article.objects.filter(
         status=ArticleStatusConfigEnum.PUBLISHED.value,
+        created_at__range=(one_week_ago, one_week_after),
     )
+
+    # Преобразуем queryset в список заголовков
     titles_list = [i.title for i in titles_list]
 
-    # Получаем основной заголовок
-    main_title = Article.objects.get(pk=article_id).title
-
     # Создаем список заголовков, включая основной
-    all_titles = [main_title] + titles_list
+    all_titles = [main_article.title] + titles_list
 
     # Инициализируем TfidfVectorizer
     vectorizer = TfidfVectorizer()
@@ -35,7 +43,7 @@ def get_top_similar_titles(article_id: int, top_n=7):
     top_titles = [titles_list[i] for i in top_indices]
 
     articles_result = [
-        Article.objects.get(title=i) for i in top_titles if i != main_title
+        Article.objects.get(title=i) for i in top_titles if i != main_article.title
     ]
 
     return articles_result
