@@ -45,7 +45,7 @@ services:
     container_name: 'news-web'
     restart: always
     user: news_app
-    command: /bin/sh -c "python3 -m gunicorn -b 0.0.0.0:80 News.wsgi --reload --log-level debug -w 4"
+    command: /bin/sh -c "python3 -m gunicorn -b 0.0.0.0:80 News.wsgi -w 8"
     env_file:
       - .env
     volumes:
