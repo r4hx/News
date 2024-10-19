@@ -8,6 +8,6 @@ from Web.urls import urlpatterns as web_urlpatterns
 urlpatterns = [
     path("healthz/", HealthCheckView.as_view(), name="health-checker"),
     path("rss/", include(rss_urlpatterns)),
-    path("", include(web_urlpatterns)),
     path("admin/", admin.site.urls),
+    path("", include(web_urlpatterns)),
 ]
