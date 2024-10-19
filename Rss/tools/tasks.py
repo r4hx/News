@@ -30,6 +30,4 @@ def wait_for_object_to_save_in_store(
         except ObjectDoesNotExist:
             continue
     else:
-        raise TimeoutError(
-            f"Не удалось получить доступ к объекту {pk=} в хранилище {model_class=}."
-        )
+        raise TimeoutError

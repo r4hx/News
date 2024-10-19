@@ -34,7 +34,7 @@ def get_title_from_source_url(url: str) -> str:
         return title
     else:
         logger.error(f"Не удалось получить название статьи из {url=}")
-        raise TitleNotFoundError(f"Не удалось получить название статьи из {url=}")
+        raise TitleNotFoundError
 
 
 def extract_title(soup: BeautifulSoup) -> str:
