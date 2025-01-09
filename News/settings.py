@@ -31,9 +31,8 @@ if SENTRY_DSN:
         integrations=[DjangoIntegration()],
         environment=APP_ENV,
         release=RELEASE,
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
-        auto_session_tracking=False,  # for glitchtip
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
         ignore_errors=[],
     )
 
