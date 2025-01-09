@@ -20,6 +20,8 @@ if not APP_SITE_ADDRESS:
     raise Exception("APP_SITE_ADDRESS is not set")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
+RELEASE = os.getenv("RELEASE")
+
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -28,8 +30,10 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
         environment=APP_ENV,
+        release=RELEASE,
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
+        auto_session_tracking=False,  # for glitchtip
         ignore_errors=[],
     )
 
