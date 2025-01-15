@@ -31,7 +31,14 @@ class FeedArticlesFeed(Feed):
             image_html = f'<img src="{item.image_url}" alt="{item.title}" style="max-width:100%;" /><br><br>'
         else:
             image_html = ""
-        return mark_safe(f"{image_html}{linebreaks(item.summary)}")
+        return mark_safe(
+            f"{image_html}{linebreaks(item.summary)}{self.shortview_url(item=item)}"
+        )
 
     def item_link(self, item):
-        return item.get_absolute_url()
+        return item.url
+
+    def shortview_url(self, item):
+        url = item.get_absolute_url()
+        text = f'<br><p><a href="{url}" target=_blank>Ссылка</a></p>'
+        return text
