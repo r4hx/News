@@ -62,8 +62,6 @@
                     <!-- Основное содержание статьи -->
                     <div class="content">
                         <p>{{ article.summary|linebreaksbr }}</p>
-                        
-                        <p><a href="{{ article.get_full_url }}" target="_blank">Ссылка</a></p>
                     </div>
                     <!-- Проверка и отображение похожих записей -->
                     {% if article.related.all %}

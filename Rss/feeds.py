@@ -31,7 +31,7 @@ class FeedArticlesFeed(Feed):
             image_html = f'<img src="{item.image_url}" alt="{item.title}" style="max-width:100%;" /><br><br>'
         else:
             image_html = ""
-        return mark_safe(f"{image_html}{linebreaks(item.summary)}")
+        return mark_safe(f"{image_html}{linebreaks(item.summary)}{item.get_full_url()}")
 
     def item_pubdate(self, item):
         return item.created_at
