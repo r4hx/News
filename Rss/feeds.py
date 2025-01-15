@@ -39,6 +39,6 @@ class FeedArticlesFeed(Feed):
         return item.url
 
     def shortview_url(self, item):
-        url = item.get_absolute_url()
+        url = item.get_full_url()
         text = f'<br><p><a href="{url}" target=_blank>Ссылка</a></p>'
         return text
