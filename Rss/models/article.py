@@ -89,8 +89,10 @@ class Article(models.Model):
         return f"/{self.source.slug}/{self.get_encoded_id()}/"
 
     def get_full_url(self):
-        url = f"http://{APP_SITE_ADDRESS}/{self.source.slug}/{self.get_encoded_id()}"
-        return format_html("<a href={url} target=_blank>{url}</a>", url=url)
+        full_url = (
+            f"https://{APP_SITE_ADDRESS}/{self.source.slug}/{self.get_encoded_id()}"
+        )
+        return format_html(f"<a href={full_url} target=_blank>{full_url}</a>")
 
     def save(self, *args, **kwargs):
         self.updated_at = timezone.now()
