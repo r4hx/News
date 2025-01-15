@@ -29,9 +29,9 @@ def get_image_from_source_url(url: str) -> str:
 
     image_url = extract_image_url(soup)
     if image_url:
-        logger.debug(f"Найдено изображение: {image_url}")
+        logger.info(f"Найдено изображение: {image_url}")
     else:
-        logger.debug(f"Не удалось найти изображение в {url=}")
+        logger.info(f"Не удалось найти изображение в {url=}")
 
     return image_url
 
@@ -43,13 +43,17 @@ def extract_image_url(soup: BeautifulSoup) -> str:
     :param soup: Объект BeautifulSoup с HTML-контентом
     :return: URL изображения или None, если изображение не найдено
     """
-    og_image_tag = soup.find("meta", property="og:image")
+    og_image_tag = soup.find("meta", attrs={"property": "og:image"}) or soup.find(
+        "meta", attrs={"name": "og:image"}
+    )
     if og_image_tag and og_image_tag.get("content"):
-        return og_image_tag.get("content")
+        return og_image_tag["content"]
 
-    twitter_image_tag = soup.find("meta", property="twitter:image")
+    twitter_image_tag = soup.find(
+        "meta", attrs={"property": "twitter:image"}
+    ) or soup.find("meta", attrs={"name": "twitter:image"})
     if twitter_image_tag and twitter_image_tag.get("content"):
-        return twitter_image_tag.get("content")
+        return twitter_image_tag["content"]
 
     default_image = "https://egorovegor.ru/wp-content/uploads/stati.jpeg"
     return default_image
