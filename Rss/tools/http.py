@@ -1,4 +1,5 @@
 import os
+import random
 import time
 
 import httpx
@@ -19,6 +20,19 @@ if not HTTP_TIME_SLEEP_AFTER_TOO_MANY_CONNECTION:
     raise EnvironmentError("HTTP_TIME_SLEEP_AFTER_TOO_MANY_CONNECTION is not set")
 if not HTTP_TIME_SLEEP_BETWEEN_CONNECTION:
     raise EnvironmentError("HTTP_TIME_SLEEP_BETWEEN_CONNECTION is not set")
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7; rv:110.0) Gecko/20100101 Firefox/110.0",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:110.0) Gecko/20100101 Firefox/110.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+]
 
 
 class HttpClient:
@@ -52,6 +66,12 @@ class HttpClient:
         else:
             time.sleep(self.time_sleep_between_connection)
 
+    def _get_random_user_agent(self) -> str:
+        """
+        Возвращает случайный User-Agent из списка
+        """
+        return random.choice(USER_AGENTS)
+
     def get(self, url: str, **kwargs) -> httpx.Response:
         """
         GET-запрос
@@ -59,8 +79,10 @@ class HttpClient:
         :param url: URL для запроса
         :return: Ответ от сервера
         """
-        logger.debug(f"GET {url=}")
-        response = self.client.get(url, **kwargs)
+        headers = kwargs.pop("headers", {})
+        headers["User-Agent"] = self._get_random_user_agent()
+        logger.debug(f"GET {url=} with User-Agent: {headers['User-Agent']}")
+        response = self.client.get(url, headers=headers, **kwargs)
         self._handle_rate_limit(response)
         return response
 
@@ -71,7 +93,9 @@ class HttpClient:
         :param url: URL для запроса
         :return: Ответ от сервера
         """
-        logger.debug(f"POST {url=}")
-        response = self.client.post(url, **kwargs)
+        headers = kwargs.pop("headers", {})
+        headers["User-Agent"] = self._get_random_user_agent()
+        logger.debug(f"POST {url=} with User-Agent: {headers['User-Agent']}")
+        response = self.client.post(url, headers=headers, **kwargs)
         self._handle_rate_limit(response)
         return response
